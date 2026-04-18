@@ -1,0 +1,137 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="detail-grid">
+        <div>
+            <h2>{{ item.name }}</h2>
+            <p class="text-muted">SKU: <code>{{ item.sku|default:"N/A" }}</code></p>
+            {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="image-preview">
+            {% else %}
+                <div class="detail-panel detail-empty-state">
+                    <span style="color: #6c757d;">No image available</span>
+                </div>
+            {% endif %}
+            <p>{{ item.description|default:"No description added yet." }}</p>
+        </div>
+        <div class="detail-panel">
+            <h3>Inventory Details</h3>
+            <p><strong>Quantity:</strong> {{ item.quantity }} {{ item.unit }}</p>
+            <p><strong>Price:</strong> ${{ item.price }}</p>
+            <p><strong>Total Value:</strong> ${{ item.total_value }}</p>
+            <p><strong>Category:</strong> {{ item.category|default:"Uncategorized" }}</p>
+            <p><strong>Supplier:</strong> {{ item.supplier|default:"No supplier" }}</p>
+            <p><strong>Reorder Point:</strong> {{ item.reorder_point }} {{ item.unit }}</p>
+            <p><strong>Reorder Quantity:</strong> {{ item.reorder_quantity }} {{ item.unit }}</p>
+            <p><strong>Status:</strong>
+                {% if item.needs_reorder %}
+                    <span class="status-badge status-reorder">Needs reorder</span>
+                {% elif item.quantity < 20 %}
+                    <span class="status-badge status-low">Low stock</span>
+                {% else %}
+                    <span class="status-badge status-ok">Healthy</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="card-grid">
+        <div class="detail-panel">
+            <h3>Recent Stock Movements</h3>
+            {% if recent_movements %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Qty</th>
+                        <th>Reason</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in recent_movements %}
+                    <tr>
+                        <td>{{ movement.get_movement_type_display }}</td>
+                        <td>{{ movement.quantity }}</td>
+                        <td>{{ movement.reason|default:"-" }}</td>
+                        <td>{{ movement.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #6c757d;">No stock movements recorded.</p>
+            {% endif %}
+        </div>
+
+        <div class="detail-panel">
+            <h3>Batch History</h3>
+            {% if batches %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Qty</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for batch in batches %}
+                    <tr{% if batch.is_expired %} style="background-color: #fff5f5;"{% endif %}>
+                        <td>{{ batch.batch_number }}</td>
+                        <td>{{ batch.quantity }} {{ item.unit }}</td>
+                        <td>{% if batch.expiry_date %}{{ batch.expiry_date|date:"M d, Y" }}{% else %}-{% endif %}</td>
+                        <td>
+                            {% if batch.is_expired %}
+                                <span style="color: #dc3545;">Expired</span>
+                            {% else %}
+                                <span style="color: #28a745;">Active</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #6c757d;">No batches found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="detail-panel">
+        <h3>Recent Audit Activity</h3>
+        {% if audit_history %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_history %}
+                <tr>
+                    <td>{{ log.get_action_display }}</td>
+                    <td>{{ log.description|truncatechars:60 }}</td>
+                    <td>{{ log.timestamp|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #6c757d;">No audit activity available.</p>
+        {% endif %}
+    </div>
+
+    <div class="button-row">
+        <a href="{% url 'item_update' item.pk %}" class="btn btn-warning">Edit Item</a>
+        <a href="{% url 'batch_list' item.pk %}" class="btn btn-info">View Batches</a>
+        <a href="{% url 'item_list' %}" class="btn btn-secondary">Back to Items</a>
+    </div>
+</div>
+{% endblock %}

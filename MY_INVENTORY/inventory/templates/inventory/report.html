@@ -1,0 +1,80 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Inventory Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Inventory Report</h2>
+    <p><strong>Total Inventory Value:</strong> ${{ total_value }}</p>
+</div>
+
+<div class="card">
+    <h2>All Items</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item_value in item_values %}
+            <tr>
+                <td>{{ item_value.item.name }}</td>
+                <td>{{ item_value.item.quantity }}</td>
+                <td>${{ item_value.item.price }}</td>
+                <td>${{ item_value.value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Low Stock Items (Quantity < 10)</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in low_stock %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Recent Stock Movements</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Reason</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movement in movements %}
+            <tr>
+                <td>{{ movement.item.name }}</td>
+                <td>{{ movement.get_movement_type_display }}</td>
+                <td>{{ movement.quantity }}</td>
+                <td>{{ movement.reason }}</td>
+                <td>{{ movement.created_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Item Batches{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>
+        {% if item %}
+            Batches for {{ item.name }}
+        {% else %}
+            All Item Batches
+        {% endif %}
+    </h2>
+    
+    {% if item %}
+        <a href="{% url 'batch_create' item.pk %}" class="btn btn-success">Add New Batch</a>
+    {% endif %}
+    
+    {% if batches %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Batch Number</th>
+                <th>Quantity</th>
+                <th>Received Date</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for batch in batches %}
+            <tr{% if batch.is_expired %} style="background-color: #fff5f5;"{% endif %}>
+                <td>{{ batch.item.name }}</td>
+                <td><code>{{ batch.batch_number }}</code></td>
+                <td>{{ batch.quantity }} {{ batch.item.unit }}</td>
+                <td>{{ batch.received_date|date:"M d, Y" }}</td>
+                <td>
+                    {% if batch.expiry_date %}
+                        {{ batch.expiry_date|date:"M d, Y" }}
+                    {% else %}
+                        <span style="color: #999;">No expiry</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if batch.is_expired %}
+                        <span style="background-color: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px;">⚠️ Expired</span>
+                    {% else %}
+                        <span style="background-color: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 4px;">✓ Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'batch_delete' batch.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div style="text-align: center; margin-top: 2rem;">
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="btn btn-secondary btn-sm">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary btn-sm">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary btn-sm">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary btn-sm">Last</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="text-align: center; padding: 2rem; background-color: #e9ecef; border-radius: 4px;">
+        <p style="color: #495057;">No batches found.</p>
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'item_list' %}" class="btn btn-secondary">Back to Items</a>
+    </div>
+</div>
+
+<style>
+table.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.table th {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    font-weight: bold;
+}
+
+table.table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+}
+
+table.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+code {
+    background-color: #f5f5f5;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Supplier{% else %}Create Supplier{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{% if form.instance.pk %}Edit Supplier{% else %}Create New Supplier{% endif %}</h2>
+    <form method="post" class="form-container">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+            <div class="error">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.contact_info.id_for_label }}">{{ form.contact_info.label }}</label>
+            {{ form.contact_info }}
+            {% if form.contact_info.errors %}
+            <div class="error">{{ form.contact_info.errors }}</div>
+            {% endif %}
+        </div>
+        <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{% url 'supplier_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-container {
+    max-width: 500px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.error {
+    color: #dc3545;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

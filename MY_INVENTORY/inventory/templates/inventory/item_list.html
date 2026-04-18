@@ -1,0 +1,98 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Inventory List{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Inventory Items</h2>
+    <div class="summary-grid">
+        <div class="summary-card">
+            <h3>Total Items</h3>
+            <p>{{ items.paginator.count if items.paginator else items|length }}</p>
+        </div>
+        <div class="summary-card">
+            <h3>Search</h3>
+            <form class="search-form" method="get">
+                <input type="text" name="q" placeholder="Search items..." value="{{ request.GET.q }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        <div class="summary-card" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <a href="{% url 'item_create' %}" class="btn btn-success">Add New Item</a>
+            <a href="{% url 'export_csv' %}" class="btn btn-info">Export to CSV</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Category</th>
+                <th>Supplier</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr class="product-row{% if item.needs_reorder %} needs-reorder{% endif %}">
+                <td class="product-image-cell" data-label="Image">
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                    {% else %}
+                        <div class="placeholder">No image</div>
+                    {% endif %}
+                </td>
+                <td data-label="SKU"><code>{{ item.sku|default:"—" }}</code></td>
+                <td data-label="Name">{{ item.name }}</td>
+                <td data-label="Quantity">
+                    {{ item.quantity }} {{ item.unit }}
+                    {% if item.needs_reorder %}
+                        <br><small style="color: #dc3545;">⚠️ Below reorder point</small>
+                    {% endif %}
+                </td>
+                <td data-label="Price">${{ item.price }}</td>
+                <td data-label="Status">
+                    {% if item.needs_reorder %}
+                        <span class="status-badge status-reorder">Reorder</span>
+                    {% elif item.quantity < 20 %}
+                        <span class="status-badge status-low">Low</span>
+                    {% else %}
+                        <span class="status-badge status-ok">OK</span>
+                    {% endif %}
+                </td>
+                <td data-label="Category">{{ item.category|default:"No Category" }}</td>
+                <td data-label="Supplier">{{ item.supplier|default:"No Supplier" }}</td>
+                <td class="item-actions" data-label="Actions">
+                    <a href="{% url 'item_detail' item.pk %}" class="btn btn-secondary btn-sm">View</a>
+                    <a href="{% url 'item_update' item.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'batch_list' item.pk %}" class="btn btn-info btn-sm">Batches</a>
+                    <a href="{% url 'item_delete' item.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1&q={{ request.GET.q }}">&laquo; First</a>
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}">Previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}&q={{ request.GET.q }}">Last &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

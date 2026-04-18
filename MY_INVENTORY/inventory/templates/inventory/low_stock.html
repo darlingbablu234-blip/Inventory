@@ -1,0 +1,90 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Low Stock Alerts{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Low Stock Alerts</h2>
+    <p style="color: #dc3545; font-weight: bold;">Items with quantity below 10 units</p>
+    
+    {% if low_stock_items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th>Price</th>
+                <th>Total Value</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in low_stock_items %}
+            <tr style="background-color: #fff5f5;">
+                <td><strong>{{ item.name }}</strong></td>
+                <td>{{ item.category|default:"Uncategorized" }}</td>
+                <td>
+                    <span style="background-color: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px;">
+                        {{ item.quantity }}
+                    </span>
+                </td>
+                <td>${{ item.price }}</td>
+                <td>${{ item.total_value }}</td>
+                <td>
+                    <a href="{% url 'item_update' item.pk %}" class="btn btn-warning btn-sm">Update Stock</a>
+                    <a href="{% url 'stock_movement' %}" class="btn btn-info btn-sm">Add Stock</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div style="text-align: center; margin-top: 2rem;">
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="btn btn-secondary btn-sm">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary btn-sm">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary btn-sm">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary btn-sm">Last</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="text-align: center; padding: 2rem; background-color: #d4edda; border-radius: 4px;">
+        <p style="color: #155724; font-weight: bold;">✓ All items have sufficient stock!</p>
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'item_list' %}" class="btn btn-secondary">Back to Items</a>
+    </div>
+</div>
+
+<style>
+table.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.table th {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    font-weight: bold;
+}
+
+table.table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+}
+
+table.table tbody tr:hover {
+    background-color: #fffbf0;
+}
+</style>
+{% endblock %}
